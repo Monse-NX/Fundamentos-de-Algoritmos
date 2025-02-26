@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+bool es_palindromo(int x) {
+    if (x < 0 || (x % 10 == 0 && x != 0)) {
+        return false;
+    }
+    
+    int revertido = 0;
+    int original = x;
+    while (x > revertido) {
+        revertido = revertido * 10 + x % 10;
+        x /= 10;
+    }
+    
+    return x == revertido || x == revertido / 10;
+}
+
+int main() {
+    printf("%d\n", es_palindromo(121));  // 1 (True)
+    printf("%d\n", es_palindromo(-121)); // 0 (False)
+    printf("%d\n", es_palindromo(10));   // 0 (False)
+    return 0;
+}
