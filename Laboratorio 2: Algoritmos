@@ -1,0 +1,53 @@
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int divide(int dividend, int divisor) {
+    // Manejar el caso especial de desbordamiento
+    if (dividend == INT_MIN && divisor == -1) {
+        return INT_MAX;
+    }
+    
+    // Determinar el signo del resultado
+    int negative = (dividend < 0) ^ (divisor < 0);
+    
+    // Convertir ambos números a valores absolutos
+    long long dvd = llabs((long long)dividend);
+    long long dvs = llabs((long long)divisor);
+    
+    int quotient = 0;
+    
+    // Restar repetitivamente el divisor del dividendo
+    while (dvd >= dvs) {
+        long long temp = dvs, multiple = 1;
+        while (dvd >= (temp << 1)) {  // Duplicar el divisor
+            temp <<= 1;
+            multiple <<= 1;
+        }
+        
+        dvd -= temp;
+        quotient += multiple;
+    }
+    
+    // Aplicar el signo correcto
+    return negative ? -quotient : quotient;
+}
+
+int main() {
+    int dividend, divisor;
+    
+    // Solicitar entrada al usuario
+    printf("Ingrese el dividendo: ");
+    scanf("%d", &dividend);
+    printf("Ingrese el divisor: ");
+    scanf("%d", &divisor);
+    
+    // Manejar el caso de divisor 0
+    if (divisor == 0) {
+        printf("Error: División por cero no permitida.\n");
+        return 1;
+    }
+    
+    printf("Resultado: %d\n", divide(dividend, divisor));
+    return 0;
+}
