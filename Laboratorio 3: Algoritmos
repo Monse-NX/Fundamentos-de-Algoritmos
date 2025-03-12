@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Definir el mapeo de los números a letras según un teclado telefónico
+const char *teclado[] = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+
+// Función recursiva para generar combinaciones
+typedef struct {
+    char **data;
+    int size;
+} Resultado;
+
+void generarCombinaciones(char *digits, int index, char *actual, Resultado *res) {
+    if (digits[index] == '\0') { // Si hemos recorrido todos los dígitos
+        res->data[res->size] = strdup(actual); // Guardamos la combinación
+        res->size++;
+        return;
+    }
+    
+    int num = digits[index] - '0';
+    for (int i = 0; teclado[num][i] != '\0'; i++) {
+        actual[index] = teclado[num][i];
+        generarCombinaciones(digits, index + 1, actual, res);
+    }
+}
+
+// Función principal para obtener las combinaciones
+Resultado obtenerCombinaciones(char *digits) {
+    Resultado res;
+    res.size = 0;
+    res.data = malloc(100 * sizeof(char*)); // Reservamos memoria para hasta 100 combinaciones
+    if (digits[0] == '\0') return res; // Si la entrada está vacía, devolvemos lista vacía
+    
+    char actual[5] = ""; // Máximo 4 caracteres más terminador nulo
+    generarCombinaciones(digits, 0, actual, &res);
+    return res;
+}
+
+// Función principal para probar el código
+int main() {
+    char digits[5];
+    printf("Ingrese los dígitos (2-9): ");
+    scanf("%4s", digits);
+    
+    Resultado res = obtenerCombinaciones(digits);
+    printf("Combinaciones posibles: [");
+    for (int i = 0; i < res.size; i++) {
+        printf("\"%s\"%s", res.data[i], i == res.size - 1 ? "" : ", ");
+        free(res.data[i]); // Liberar memoria
+    }
+    printf("]\n");
+    free(res.data); // Liberar memoria del array
+    
+    return 0;
+}
