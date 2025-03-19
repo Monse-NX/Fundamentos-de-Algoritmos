@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+long long sumChemistry(int* skill, int skillSize) {
+    qsort(skill, skillSize, sizeof(int), compare);
+    
+    int targetSum = skill[0] + skill[skillSize - 1];
+    long long totalChemistry = 0;
+    
+    for (int i = 0, j = skillSize - 1; i < j; i++, j--) {
+        if (skill[i] + skill[j] != targetSum) {
+            return -1;
+        }
+        totalChemistry += (long long)skill[i] * skill[j];
+    }
+    
+    return totalChemistry;
+}
+
+int main() {
+    int skill1[] = {3, 2, 5, 1, 3, 4};
+    int skill2[] = {3, 4};
+    int skill3[] = {1, 1, 2, 3};
+    
+    printf("%lld\n", sumChemistry(skill1, 6)); // Output: 22
+    printf("%lld\n", sumChemistry(skill2, 2)); // Output: 12
+    printf("%lld\n", sumChemistry(skill3, 4)); // Output: -1
+    
+    return 0;
+}
