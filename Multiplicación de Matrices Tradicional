@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <time.h>
+
+#define MAX 100
+
+void multiplicarMatrices(int A[MAX][MAX], int B[MAX][MAX], int C[MAX][MAX], int filasA, int columnasA, int columnasB) {
+    for (int i = 0; i < filasA; i++) {
+        for (int j = 0; j < columnasB; j++) {
+            C[i][j] = 0; // Inicializar elemento
+            for (int k = 0; k < columnasA; k++) {
+                C[i][j] += A[i][k] * B[k][j]; // Suma acumulativa del producto
+            }
+        }
+    }
+}
+
+void imprimirMatriz(int M[MAX][MAX], int filas, int columnas) {
+    for (int i = 0; i < filas; i++) {
+        for (int j = 0; j < columnas; j++) {
+            printf("%d ", M[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int A[MAX][MAX], B[MAX][MAX], C[MAX][MAX];
+    int filasA, columnasA, filasB, columnasB;
+
+    // Entrada para la primera matriz
+    printf("Ingrese el número de filas de la matriz A: ");
+    scanf("%d", &filasA);
+    printf("Ingrese el número de columnas de la matriz A: ");
+    scanf("%d", &columnasA);
+
+    printf("Ingrese los elementos de la matriz A:\n");
+    for (int i = 0; i < filasA; i++) {
+        for (int j = 0; j < columnasA; j++) {
+            scanf("%d", &A[i][j]);
+        }
+    }
+
+    // Entrada para la segunda matriz
+    printf("Ingrese el número de filas de la matriz B: ");
+    scanf("%d", &filasB);
+    printf("Ingrese el número de columnas de la matriz B: ");
+    scanf("%d", &columnasB);
+
+    if (columnasA != filasB) {
+        printf("Error: El número de columnas de A debe ser igual al número de filas de B.\n");
+        return 1;
+    }
+
+    printf("Ingrese los elementos de la matriz B:\n");
+    for (int i = 0; i < filasB; i++) {
+        for (int j = 0; j < columnasB; j++) {
+            scanf("%d", &B[i][j]);
+        }
+    }
+
+    // Medir tiempo
+    clock_t inicio, fin;
+    double tiempo;
+
+    inicio = clock(); // Inicia medición
+
+    multiplicarMatrices(A, B, C, filasA, columnasA, columnasB);
+
+    fin = clock(); // Termina medición
+
+    tiempo = ((double)(fin - inicio)) / CLOCKS_PER_SEC;
+
+    // Resultado
+    printf("La matriz resultante C = A x B es:\n");
+    imprimirMatriz(C, filasA, columnasB);
+
+    printf("Tiempo de ejecución de la multiplicación: %f segundos\n", tiempo);
+
+    return 0;
+}
