@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <math.h>
+
+// Autor: Juan Pérez Gómez  <-- Reemplaza con tu nombre completo
+
+#define MAX_FIB 1000  // Suficiente para valores de K hasta ~10^6
+
+// Función para verificar si un número es primo
+bool esPrimo(int n) {
+    if (n < 2) return false;
+    for (int i = 2; i <= sqrt(n); ++i) {
+        if (n % i == 0) return false;
+    }
+    return true;
+}
+
+// Genera la secuencia de Fibonacci filtrando posiciones primas
+int generarFibonacciFiltrado(int fib[], int k) {
+    int a = 0, b = 1;
+    int pos = 1;
+    int count = 0;
+
+    while (a <= k) {
+        if (!esPrimo(pos)) {
+            fib[count++] = a;
+        }
+        int temp = a + b;
+        a = b;
+        b = temp;
+        pos++;
+    }
+    return count;
+}
+
+// Encuentra la cantidad mínima de términos que sumen exactamente a K
+int encontrarMinSumaFibonacci(int k, int fib[], int len, int resultado[]) {
+    int count = 0;
+    for (int i = len - 1; i >= 0 && k > 0; --i) {
+        if (fib[i] <= k) {
+            resultado[count++] = fib[i];
+            k -= fib[i];
+        }
+    }
+    return count;
+}
+
+int main() {
+    // === Datos de nacimiento ===
+    int dia = 25;
+    int mes = 12;
+    int anio = 1995;
+
+    // Cálculo de K
+    int K = dia * 100 + mes * 10 + (anio % 100);  // 2715
+
+    int fib[MAX_FIB], resultado[MAX_FIB];
+    int len = generarFibonacciFiltrado(fib, K);
+
+    // Mostrar la secuencia filtrada
+    printf("Secuencia de Fibonacci filtrada (sin posiciones primas):\n");
+    for (int i = 0; i < len; i++) {
+        printf("%d ", fib[i]);
+    }
+
+    printf("\n\nSolución óptima:\n");
+    int n = encontrarMinSumaFibonacci(K, fib, len, resultado);
+
+    int suma = 0;
+    for (int i = 0; i < n; i++) {
+        suma += resultado[i];
+        printf("%d", resultado[i]);
+        if (i < n - 1) printf(" + ");
+    }
+    printf(" = %d\n", suma);
+    printf("Número de términos: %d\n", n);
+
+    return 0;
+}
