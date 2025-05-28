@@ -1,0 +1,158 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_CHARS 256
+#define MAX_CODE_LEN 256
+
+
+//para usarlo en visual studio, es necesario usar una carpeta en especifico **ProyectoHuffman**
+//Nuestro código necesita estar guardado como archivo tipo c (archivo.c) en la carpeta mencionada anteriormente
+//El archivo que se desea comprimiir debe estar guardado en la misma carpeta que el codigo.
+
+typedef struct Nodo {
+    char c;
+    int freq;
+    struct Nodo *izq, *der;
+} Nodo;
+
+typedef struct {
+    Nodo **array;
+    int tam;
+} MinHeap;
+
+Nodo* nuevoNodo(char c, int freq) {
+    Nodo* nodo = (Nodo*) malloc(sizeof(Nodo));
+    nodo->c = c;
+    nodo->freq = freq;
+    nodo->izq = nodo->der = NULL;
+    return nodo;
+}
+
+MinHeap* crearHeap(int capacidad) {
+    MinHeap* heap = (MinHeap*) malloc(sizeof(MinHeap));
+    heap->array = (Nodo**) malloc(capacidad * sizeof(Nodo*));
+    heap->tam = 0;
+    return heap;
+}
+
+void intercambiar(Nodo** a, Nodo** b) {
+    Nodo* t = *a;
+    *a = *b;
+    *b = t;
+}
+
+void ordenarHeap(MinHeap* heap) {
+    for (int i = 0; i < heap->tam - 1; i++) {
+        for (int j = 0; j < heap->tam - i - 1; j++) {
+            if (heap->array[j]->freq > heap->array[j + 1]->freq) {
+                intercambiar(&heap->array[j], &heap->array[j + 1]);
+            }
+        }
+    }
+}
+
+void insertarHeap(MinHeap* heap, Nodo* nodo) {
+    heap->array[heap->tam++] = nodo;
+    ordenarHeap(heap);
+}
+
+Nodo* extraerMin(MinHeap* heap) {
+    return heap->array[--heap->tam];
+}
+
+void generarCodigos(Nodo* raiz, char* codigo, int nivel, char codigos[][MAX_CODE_LEN]) {
+    if (raiz->izq) {
+        codigo[nivel] = '0';
+        generarCodigos(raiz->izq, codigo, nivel + 1, codigos);
+    }
+    if (raiz->der) {
+        codigo[nivel] = '1';
+        generarCodigos(raiz->der, codigo, nivel + 1, codigos);
+    }
+    if (!raiz->izq && !raiz->der) {
+        codigo[nivel] = '\0';
+        strcpy(codigos[(unsigned char)raiz->c], codigo);
+    }
+}
+
+Nodo* construirArbol(int* freq) {
+    MinHeap* heap = crearHeap(MAX_CHARS);
+    for (int i = 0; i < MAX_CHARS; i++) {
+        if (freq[i] > 0) {
+            insertarHeap(heap, nuevoNodo(i, freq[i]));
+        }
+    }
+
+    while (heap->tam > 1) {
+        Nodo* izq = extraerMin(heap);
+        Nodo* der = extraerMin(heap);
+        Nodo* combinado = nuevoNodo('\0', izq->freq + der->freq);
+        combinado->izq = izq;
+        combinado->der = der;
+        insertarHeap(heap, combinado);
+    }
+
+    return extraerMin(heap);
+}
+
+void codificarArchivo(const char* entrada, const char* salida, char codigos[][MAX_CODE_LEN]) {
+    FILE* fin = fopen(entrada, "r");
+    FILE* fout = fopen(salida, "w");
+    int original_bits = 0, comprimido_bits = 0;
+    char c;
+    while ((c = fgetc(fin)) != EOF) {
+        fputs(codigos[(unsigned char)c], fout);
+        original_bits += 8;
+        comprimido_bits += strlen(codigos[(unsigned char)c]);
+    }
+    fclose(fin);
+    fclose(fout);
+
+    printf("Tamaño original: %d bits\n", original_bits);
+    printf("Tamaño comprimido: %d bits\n", comprimido_bits);
+    printf("Tasa de compresión: %.4f\n", (float)comprimido_bits / original_bits);
+}
+
+void decodificarArchivo(const char* codificado, Nodo* arbol) {
+    FILE* f = fopen(codificado, "r");
+    char bit;
+    Nodo* nodo = arbol;
+    printf("\nTexto decodificado:\n");
+    while ((bit = fgetc(f)) != EOF) {
+        nodo = (bit == '0') ? nodo->izq : nodo->der;
+        if (!nodo->izq && !nodo->der) {
+            printf("%c", nodo->c);
+            nodo = arbol;
+        }
+    }
+    fclose(f);
+}
+
+int main() {
+    FILE* archivo = fopen("entrada.txt", "r");
+    if (!archivo) {
+        printf("No se pudo abrir entrada.txt\n");
+        return 1;
+    }
+
+    int freq[MAX_CHARS] = {0};
+    char c;
+    while ((c = fgetc(archivo)) != EOF) {
+        freq[(unsigned char)c]++;
+    }
+    fclose(archivo);
+
+    Nodo* arbol = construirArbol(freq);
+    char codigos[MAX_CHARS][MAX_CODE_LEN] = {{0}};
+    char codigo[MAX_CODE_LEN];
+    generarCodigos(arbol, codigo, 0, codigos);
+
+    codificarArchivo("entrada.txt", "codificado.txt", codigos);
+    decodificarArchivo("codificado.txt", arbol);
+
+    return 0;
+}
+
+
+
