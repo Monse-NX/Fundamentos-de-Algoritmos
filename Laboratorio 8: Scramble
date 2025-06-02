@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_LEN 31 // máximo permitido por el enunciado (1 <= len <= 30)
+
+// Verifica si dos strings son anagramas
+bool isAnagram(const char *s1, const char *s2, int len) {
+    int count[26] = {0};
+    for (int i = 0; i < len; i++) {
+        count[s1[i] - 'a']++;
+        count[s2[i] - 'a']--;
+    }
+    for (int i = 0; i < 26; i++) {
+        if (count[i] != 0)
+            return false;
+    }
+    return true;
+}
+
+// Verifica si s2 es scramble de s1
+bool isScramble(const char *s1, const char *s2, int len) {
+    if (strncmp(s1, s2, len) == 0)
+        return true;
+
+    if (!isAnagram(s1, s2, len))
+        return false;
+
+    for (int i = 1; i < len; i++) {
+        // sin intercambio
+        if (isScramble(s1, s2, i) && isScramble(s1 + i, s2 + i, len - i))
+            return true;
+
+        // con intercambio
+        if (isScramble(s1, s2 + len - i, i) && isScramble(s1 + i, s2, len - i))
+            return true;
+    }
+
+    return false;
+}
+
+bool isScrambleWrapper(const char *s1, const char *s2) {
+    int len = strlen(s1);
+    if (len != strlen(s2)) return false;
+    return isScramble(s1, s2, len);
+}
+
+int main() {
+    char s1[MAX_LEN];
+    char s2[MAX_LEN];
+
+    printf("Ingresa la primera cadena (s1): ");
+    scanf("%30s", s1); // Limita entrada a 30 caracteres
+
+    printf("Ingresa la segunda cadena (s2): ");
+    scanf("%30s", s2);
+
+    if (isScrambleWrapper(s1, s2))
+        printf("Resultado: true (s2 es una version scramble de s1)\n");
+    else
+        printf("Resultado: false (s2 NO es una version scramble de s1)\n");
+
+    return 0;
+}
