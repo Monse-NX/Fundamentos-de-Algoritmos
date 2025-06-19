@@ -1,0 +1,56 @@
+#include <stdio.h>
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+typedef struct {
+    char name[10];
+    int weight;
+    int value;
+} Item;
+
+int main() {
+    // Definimos los ítems: guitarra, laptop, estéreo, iPhone
+    Item items[] = {
+        {"Guitar", 1, 1500},
+        {"Stereo", 4, 3000},
+        {"Laptop", 3, 2000},
+        {"iPhone", 1, 2000}
+    };
+
+    int n = sizeof(items) / sizeof(items[0]);
+    int capacity = 4;
+
+    // Tabla para almacenar resultados parciales
+    int dp[n + 1][capacity + 1];
+
+    // Inicialización de la tabla
+    for (int i = 0; i <= n; i++) {
+        for (int w = 0; w <= capacity; w++) {
+            if (i == 0 || w == 0) {
+                dp[i][w] = 0;
+            } else if (items[i - 1].weight <= w) {
+                dp[i][w] = MAX(
+                    items[i - 1].value + dp[i - 1][w - items[i - 1].weight],
+                    dp[i - 1][w]
+                );
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+
+    // Resultado máximo
+    printf("Valor máximo: $%d\n", dp[n][capacity]);
+
+    // Reconstrucción de los elementos elegidos
+    int w = capacity;
+    printf("Elementos seleccionados:\n");
+    for (int i = n; i > 0 && w > 0; i--) {
+        if (dp[i][w] != dp[i - 1][w]) {
+            printf("- %s\n", items[i - 1].name);
+            w -= items[i - 1].weight;
+        }
+    }
+
+    return 0;
+}
